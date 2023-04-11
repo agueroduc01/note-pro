@@ -11,6 +11,7 @@ import { Link } from "react-router-dom";
 import { useContext } from "react";
 import { DataContext } from "../context/DataProvider";
 import SearchIcon from "@mui/icons-material/Search";
+import { useSelector } from "react-redux";
 
 const Header = styled(AppBar)`
   z-index: 1201;
@@ -68,7 +69,8 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 const HeaderBar = ({ open, handleDrawer }) => {
-  const { accessToken, setSearchText } = useContext(DataContext);
+  const { setSearchText } = useContext(DataContext);
+  const accessToken = useSelector((state) => state.user.login.accessToken);
   const logo =
     "https://seeklogo.com/images/G/google-keep-logo-0BC92EBBBD-seeklogo.com.png";
 
@@ -101,8 +103,6 @@ const HeaderBar = ({ open, handleDrawer }) => {
                 placeholder="Search…"
                 inputProps={{ "aria-label": "search" }}
                 onChange={(e) => setSearchText(e.target.value)}
-                // onChange={handleSearch}
-                // value={searchT}
               />
             </Search>
           </>

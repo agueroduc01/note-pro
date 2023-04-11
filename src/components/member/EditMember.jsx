@@ -3,11 +3,10 @@ import LoadingButton from "@mui/lab/LoadingButton";
 import { MenuItem, Select, InputLabel } from "@mui/material";
 import { red } from "@mui/material/colors";
 
-import { useContext, useState } from "react";
-
+import { useState } from "react";
 import { editMemberService } from "../../services/member";
-import { DataContext } from "../../context/DataProvider";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
 
 const style = {
   position: "absolute",
@@ -26,7 +25,7 @@ const style = {
 const EditMember = (props) => {
   const { open, handleCloseFromParent, member, note, members, setMembers } =
     props;
-  const { accessToken } = useContext(DataContext);
+  const accessToken = useSelector((state) => state.user.login.accessToken);
   const [role, setRole] = useState(member.role);
   const [loading, setLoading] = useState(false);
 

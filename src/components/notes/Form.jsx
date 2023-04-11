@@ -12,11 +12,13 @@ import { styled } from "@mui/material/styles";
 import { v4 as uuid } from "uuid";
 
 import { DataContext } from "../../context/DataProvider";
-
+import { createAxios } from "../../utils/createInstance";
 import { addNoteService } from "../../services/note";
 import { toast } from "react-toastify";
 import GroupAddOutlinedIcon from "@mui/icons-material/GroupAddOutlined";
 import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
+import { useSelector, useDispatch } from "react-redux";
+import { loginSuccess } from "../../redux/authSlice";
 
 const Container = styled(Box)`
   display: flex;
@@ -43,7 +45,10 @@ const Form = () => {
   const [addNote, setAddNote] = useState({ ...note, id: uuid() });
   const [images, setImages] = useState([]);
 
-  const { accessToken, setNotes, setIsLoading } = useContext(DataContext);
+  const { setNotes, setIsLoading } = useContext(DataContext);
+  const dispatch = useDispatch();
+  const accessToken = useSelector((state) => state.user.login.accessToken);
+  let axiosJWT = createAxios(accessToken, dispatch, loginSuccess);
 
   const containerRef = useRef();
 
@@ -67,7 +72,7 @@ const Form = () => {
           }
         }
         setIsLoading(true);
-        let data = await addNoteService(formData, accessToken);
+        let data = await addNoteService(formData, accessToken, axiosJWT);
         setIsLoading(false);
         setNotes((prevArr) => [data.data.data, ...prevArr]);
         setImages([]);

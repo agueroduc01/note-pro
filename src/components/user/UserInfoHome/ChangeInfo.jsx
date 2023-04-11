@@ -1,8 +1,10 @@
 import { Modal, Box, Typography, TextField, Button } from "@mui/material";
-import { useContext, useState } from "react";
-import { DataContext } from "../../../context/DataProvider";
+import { useState } from "react";
 import { changeInfoService } from "../../../services/user";
 import { toast } from "react-toastify";
+import { useSelector, useDispatch } from "react-redux";
+import { createAxios } from "../../../utils/createInstance";
+import { loginSuccess } from "../../../redux/authSlice";
 
 const style = {
   position: "absolute",
@@ -23,11 +25,18 @@ const ChangeInfo = (props) => {
   const { open, handleCloseFromParent, updateUser } = props;
   const [fullName, setFullname] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const { accessToken } = useContext(DataContext);
+  const accessToken = useSelector((state) => state.user.login.accessToken);
+  const dispatch = useDispatch();
+  let axiosJWT = createAxios(accessToken, dispatch, loginSuccess);
 
   const handleChangeInfor = async () => {
     try {
-      let data = await changeInfoService(fullName, phoneNumber, accessToken);
+      let data = await changeInfoService(
+        fullName,
+        phoneNumber,
+        accessToken,
+        axiosJWT
+      );
       if (data) {
         updateUser(data.data.data);
         toast.success(data.data.message);

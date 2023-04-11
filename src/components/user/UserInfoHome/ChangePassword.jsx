@@ -1,10 +1,21 @@
 import { Modal, Box, Typography, Input, Button } from "@mui/material";
-import { useContext, useState } from "react";
-import { DataContext } from "../../../context/DataProvider";
+import { useState } from "react";
 import {
   changePasswordService,
   getAccessTokenService,
 } from "../../../services/user";
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import {
+  loginFailed,
+  loginStart,
+  loginSuccess,
+} from "../../../redux/authSlice";
+import { setCookie } from "../../../utils/common-utils";
+import { toast } from "react-toastify";
+import { LoadingButton } from "@mui/lab";
+import { red } from "@mui/material/colors";
+import { createAxios } from "../../../utils/createInstance";
 
 const style = {
   position: "absolute",
@@ -24,24 +35,30 @@ const ChangePassword = (props) => {
   const { open, handleCloseFromParent } = props;
   const [newPassword, setNewPassword] = useState("");
   const [oldPassword, setOldPassword] = useState("");
-  const { accessToken, setAccessToken } = useContext(DataContext);
+  const accessToken = useSelector((state) => state.user.login.accessToken);
+  const isLoading = useSelector((state) => state.user.login.isFetching);
+  const dispatch = useDispatch();
+  let axiosJWT = createAxios(accessToken, dispatch, loginSuccess);
 
   const handleChangePassword = async () => {
     try {
+      dispatch(loginStart());
       let data = await changePasswordService(
         newPassword,
         oldPassword,
-        accessToken
+        accessToken,
+        axiosJWT
       );
       if (data) {
-        let newAccessToken = await getAccessTokenService(
-          data.data.refreshToken
-        );
-        setAccessToken(newAccessToken.data.data);
-        console.log("changePassword", data, data.data.message);
+        setCookie("refreshToken", data.data.data, 7);
+        let newAccessToken = await getAccessTokenService(data.data.data);
+        dispatch(loginSuccess(newAccessToken.data.data));
+        toast.success(data.data.message);
         handleClose();
       }
     } catch (error) {
+      dispatch(loginFailed());
+      toast.error(error.response.data.message);
       console.log(error.response.status, error.response.data.message);
     }
   };
@@ -54,7 +71,6 @@ const ChangePassword = (props) => {
     <>
       <Modal
         open={open}
-        onClose={handleClose}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
@@ -77,9 +93,31 @@ const ChangePassword = (props) => {
             type="text"
             onChange={(e) => setNewPassword(e.target.value)}
           />
-          <Button onClick={handleChangePassword} style={{ marginTop: "20px" }}>
-            Submit
-          </Button>
+          <div
+            style={{
+              display: "flex",
+              marginTop: "24px",
+              alignItems: "center",
+              justifyContent: "space-around",
+            }}
+          >
+            <Button
+              disabled={isLoading}
+              onClick={handleClose}
+              style={{ backgroundColor: red[500] }}
+              variant="contained"
+            >
+              Cancel
+            </Button>
+            <LoadingButton
+              color="primary"
+              onClick={handleChangePassword}
+              loading={isLoading}
+              variant="contained"
+            >
+              <span>Submit</span>
+            </LoadingButton>
+          </div>
         </Box>
       </Modal>
     </>

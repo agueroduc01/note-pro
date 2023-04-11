@@ -23,6 +23,7 @@ import EditNoteModal from "./EditNoteModal";
 import { deleteNoteService, editNoteService } from "../../services/note";
 import { toast } from "react-toastify";
 import AddMember from "../member/AddMember";
+import { useSelector } from "react-redux";
 
 const StyledCard = styled(Card)`
   border: 1px solid #e0e0e0;
@@ -38,9 +39,9 @@ const Note = ({ note }) => {
     setNotes,
     setAcrchiveNotes,
     // setDeleteNotes,
-    accessToken,
     setIsLoading,
   } = useContext(DataContext);
+  const accessToken = useSelector((state) => state.user.login.accessToken);
   const [openEditNote, setOpenEditNote] = useState(false);
   const [openAddMember, setOpenAddMember] = useState(false);
 

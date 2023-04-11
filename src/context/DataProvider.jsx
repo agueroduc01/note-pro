@@ -6,8 +6,8 @@ const DataProvider = ({ children }) => {
   const [notes, setNotes] = useState([]);
   const [archiveNotes, setAcrchiveNotes] = useState([]);
   const [deleteNotes, setDeleteNotes] = useState([]);
-  const [accessToken, setAccessToken] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoading2, setIsLoading2] = useState(false);
   const [searchText, setSearchText] = useState("");
 
   return (
@@ -19,10 +19,10 @@ const DataProvider = ({ children }) => {
         setAcrchiveNotes,
         deleteNotes,
         setDeleteNotes,
-        accessToken,
-        setAccessToken,
         isLoading,
         setIsLoading,
+        isLoading2,
+        setIsLoading2,
         searchText,
         setSearchText,
       }}

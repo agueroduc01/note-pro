@@ -24,6 +24,7 @@ import LoadingButton from "@mui/lab/LoadingButton";
 import SendIcon from "@mui/icons-material/Send";
 import { toast } from "react-toastify";
 import AddMember from "../member/AddMember";
+import { useSelector } from "react-redux";
 
 const EditNoteModal = (props) => {
   const { open, handleCloseFromParent, note } = props;
@@ -32,10 +33,10 @@ const EditNoteModal = (props) => {
     setNotes,
     setAcrchiveNotes,
     setDeleteNotes,
-    accessToken,
-    isLoading,
-    setIsLoading,
+    isLoading2,
+    setIsLoading2,
   } = useContext(DataContext);
+  const accessToken = useSelector((state) => state.user.login.accessToken);
   const [title, setTile] = useState(note.title);
   const [content, setContent] = useState(note.content);
   const [isPin, setIsPin] = useState(note.isPin);
@@ -57,9 +58,9 @@ const EditNoteModal = (props) => {
           URL.revokeObjectURL(images[i].url);
         }
       }
-      setIsLoading(true);
+      setIsLoading2(true);
       let data = await editNoteService(note.id, formData, accessToken);
-      setIsLoading(false);
+      setIsLoading2(false);
       toast.success(data.data.message);
       handleCloseFromParent(false);
       if (data.data) {
@@ -68,7 +69,7 @@ const EditNoteModal = (props) => {
         setNotes(updatedPinNotes);
       }
     } catch (error) {
-      setIsLoading(false);
+      setIsLoading2(false);
       toast.error(error.response);
     }
   };
@@ -101,14 +102,14 @@ const EditNoteModal = (props) => {
     console.log(inputTag.files);
     const imagesChoosen = inputTag.files;
     if (imagesChoosen.length > 0) {
-      setIsLoading(true);
+      setIsLoading2(true);
       for (let i = 0; i < imagesChoosen.length; i++) {
         let file = imagesChoosen[i];
         file.url = URL.createObjectURL(file);
         setImages((prevArr) => [file, ...prevArr]);
       }
       toast.success("Upload successfully!");
-      setIsLoading(false);
+      setIsLoading2(false);
     }
   };
   console.log("images", open, images.length);
@@ -333,7 +334,7 @@ const EditNoteModal = (props) => {
             color="primary"
             onClick={handleClose}
             endIcon={<SendIcon />}
-            loading={isLoading}
+            loading={isLoading2}
             loadingPosition="end"
             variant="contained"
           >

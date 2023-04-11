@@ -12,11 +12,10 @@ import Notes from "./notes/Notes";
 import Archives from "./archives/Archives";
 import DeleteNotes from "./delete/DeleteNotes";
 import Login from "./user/Login";
-import { useContext } from "react";
-import { DataContext } from "../context/DataProvider";
+import { useSelector } from "react-redux";
 
 const Home = () => {
-  const { accessToken } = useContext(DataContext);
+  const accessToken = useSelector((state) => state.user.login.accessToken);
   return (
     <Box style={{ display: "flex", width: "100%" }}>
       <Router>

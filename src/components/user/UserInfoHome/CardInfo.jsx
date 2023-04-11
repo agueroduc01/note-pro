@@ -8,22 +8,27 @@ import {
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { red } from "@mui/material/colors";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { detailService } from "../../../services/user";
-import { DataContext } from "../../../context/DataProvider";
 import ChangeInfo from "./ChangeInfo";
 import ChangePassword from "./ChangePassword";
+import { useSelector } from "react-redux";
+import { createAxios } from "../../../utils/createInstance";
+import { useDispatch } from "react-redux";
+import { loginSuccess } from "../../../redux/authSlice";
 
 const CardInfo = () => {
-  const { accessToken } = useContext(DataContext);
+  const accessToken = useSelector((state) => state.user.login.accessToken);
   const [detailUser, setDetailUser] = useState({});
   const [openChangeInfo, setOpenChangeInfo] = useState(false);
   const [openChangePassword, setOpenChangePassword] = useState(false);
+  const dispatch = useDispatch();
+  let axiosJWT = createAxios(accessToken, dispatch, loginSuccess);
 
   useEffect(() => {
     const getDetailUser = async () => {
       try {
-        let data = await detailService(accessToken);
+        let data = await detailService(accessToken, axiosJWT);
         setDetailUser(data.data.data);
       } catch (error) {
         console.log(error.response);
@@ -34,6 +39,7 @@ const CardInfo = () => {
     return () => {
       setDetailUser({});
     };
+    // eslint-disable-next-line
   }, [accessToken]);
 
   const handleCloseChangeInfo = () => {

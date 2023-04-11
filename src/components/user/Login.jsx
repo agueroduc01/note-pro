@@ -19,13 +19,16 @@ import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import { useContext, useState } from "react";
-import { DataContext } from "../../context/DataProvider";
+import { useState } from "react";
 import { getAccessTokenService, loginService } from "../../services/user";
 import { useNavigate } from "react-router-dom";
 import Register from "./Register";
 import ForgotPassword from "./ForgotPassword";
 import Loading from "../loading/Loading";
+import { setCookie } from "../../utils/common-utils";
+import { useDispatch } from "react-redux";
+import { loginFailed, loginStart, loginSuccess } from "../../redux/authSlice";
+import { useSelector } from "react-redux";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -35,8 +38,9 @@ const Login = () => {
   const [errMessage, setErrorMessage] = useState("");
   const [openModalRegister, setOpenModalRegister] = useState(false);
   const [openModalForgotPasword, setOpenModalForgotPasword] = useState(false);
-  const { setAccessToken, setIsLoading, isLoading } = useContext(DataContext);
+  const isLoading = useSelector((state) => state.user.login.isFetching);
   const nav = useNavigate();
+  const dispatch = useDispatch();
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -55,22 +59,23 @@ const Login = () => {
   const handleFormLogin = async () => {
     if (email && password) {
       try {
-        setIsLoading(true);
+        dispatch(loginStart());
         let data = await loginService(email, password);
         if (data) {
+          setCookie("refreshToken", data.data.data, 7);
           setErrorMessage(data.data.message);
           let dataHaveAccessToken = await getAccessTokenService(data.data.data);
           if (dataHaveAccessToken) {
-            setAccessToken(dataHaveAccessToken.data.data);
+            dispatch(loginSuccess(dataHaveAccessToken.data.data));
+            setTimeout(() => {
+              nav("/", { replace: true });
+            }, 1000);
           }
-          setIsLoading(false);
-          setTimeout(() => {
-            nav("/", { replace: true });
-          }, 1000);
         }
       } catch (error) {
         setErrorMessage(error.response.data.message);
         console.log(error.response.data);
+        dispatch(loginFailed());
       }
     }
   };

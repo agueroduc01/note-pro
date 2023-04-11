@@ -9,6 +9,7 @@ import {
 import { DataContext } from "../../context/DataProvider";
 import { deleteNoteService } from "../../services/note";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
 
 const StyledCard = styled(Card)`
   border: 1px solid #e0e0e0;
@@ -19,8 +20,8 @@ const StyledCard = styled(Card)`
 `;
 
 const DeleteNote = ({ deleteNote }) => {
-  const { deleteNotes, setNotes, accessToken, setDeleteNotes } =
-    useContext(DataContext);
+  const { deleteNotes, setNotes, setDeleteNotes } = useContext(DataContext);
+  const accessToken = useSelector((state) => state.user.login.accessToken);
 
   const restoreNote = (deleteNote) => {
     const updatedNotes = deleteNotes.filter(

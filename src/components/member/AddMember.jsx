@@ -23,10 +23,12 @@ import {
 import { DataContext } from "../../context/DataProvider";
 import { toast } from "react-toastify";
 import EditMember from "./EditMember";
+import { useSelector } from "react-redux";
 
 const AddMember = (props) => {
   const { open, handleCloseFromParent, note } = props;
-  const { accessToken, isLoading, setIsLoading } = useContext(DataContext);
+  const { isLoading2, setIsLoading2 } = useContext(DataContext);
+  const accessToken = useSelector((state) => state.user.login.accessToken);
   const [email, setEmail] = useState("");
   const [members, setMembers] = useState([]);
   const [openEditMember, setOpenEditMember] = useState(false);
@@ -55,25 +57,25 @@ const AddMember = (props) => {
   };
 
   const handleAddMember = async () => {
-    setIsLoading(true);
+    setIsLoading2(true);
     try {
       let data = await addMemberService(note.id, accessToken, {
         email,
         role: "editor",
       });
-      setIsLoading(false);
+      setIsLoading2(false);
       toast.success(data.data.message);
       setMembers([...members, data.data.data]);
       divInputRef.current.querySelector("input").value = "";
       divInputRef.current.querySelector("input").focus();
     } catch (error) {
-      setIsLoading(false);
+      setIsLoading2(false);
       toast.error(error.response.data.message);
     }
   };
 
   const handleDeleteMember = async (memberInput) => {
-    setIsLoading(true);
+    setIsLoading2(true);
     try {
       let data = await deleteMemberService(
         note.id,
@@ -83,11 +85,11 @@ const AddMember = (props) => {
       const updateMembers = members.filter(
         (member) => member.id !== memberInput.id
       );
-      setIsLoading(false);
+      setIsLoading2(false);
       setMembers(updateMembers);
       toast.success(data.data.message);
     } catch (error) {
-      setIsLoading(false);
+      setIsLoading2(false);
       console.log(error.response);
     }
   };
@@ -202,7 +204,7 @@ const AddMember = (props) => {
             color="secondary"
             onClick={handleAddMember}
             endIcon={<SendIcon />}
-            loading={isLoading}
+            loading={isLoading2}
             loadingPosition="end"
             variant="contained"
             style={{

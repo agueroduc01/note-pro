@@ -1,13 +1,20 @@
 //components
 import Home from "./components/Home";
-import DataProvider from "./context/DataProvider";
+import { default as DataProviderContext } from "./context/DataProvider";
 import "react-toastify/dist/ReactToastify.css";
+import { Provider as ReduxProvider } from "react-redux";
+import { persistor, store } from "./redux/store";
+import { PersistGate } from "redux-persist/integration/react";
 
 function App() {
   return (
-    <DataProvider>
-      <Home />
-    </DataProvider>
+    <DataProviderContext>
+      <ReduxProvider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
+          <Home />
+        </PersistGate>
+      </ReduxProvider>
+    </DataProviderContext>
   );
 }
 
