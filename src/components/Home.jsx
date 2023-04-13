@@ -12,10 +12,52 @@ import Notes from "./notes/Notes";
 import Archives from "./archives/Archives";
 import DeleteNotes from "./delete/DeleteNotes";
 import Login from "./user/Login";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { toast } from "react-toastify";
+import { useContext, useEffect } from "react";
+import { DataContext } from "../context/DataProvider";
+import { createAxios } from "../utils/createInstance";
+import { loginSuccess } from "../redux/authSlice";
+import { getNotesService } from "../services/note";
 
 const Home = () => {
+  const { setIsLoading, setNotes, setAcrchiveNotes, setDeleteNotes } =
+    useContext(DataContext);
   const accessToken = useSelector((state) => state.user.login.accessToken);
+
+  const dispatch = useDispatch();
+  let axiosJWT = createAxios(accessToken, dispatch, loginSuccess);
+
+  useEffect(() => {
+    const getNotes = async () => {
+      setIsLoading(true);
+      try {
+        let data = await getNotesService(accessToken, axiosJWT);
+        setIsLoading(false);
+        if (data) {
+          const allNotes = data.data.data.filter(
+            (note) => !note.isRemoved && !note.isArchived
+          );
+          setNotes(allNotes);
+          toast.success(data.data.message);
+          const archivedNotes = data.data.data.filter(
+            (note) => note.isArchived
+          );
+          setAcrchiveNotes(archivedNotes);
+          const deletedNotes = data.data.data.filter((note) => note.isRemoved);
+          setDeleteNotes(deletedNotes);
+        }
+      } catch (error) {
+        toast.error(error.response.data.message);
+      }
+    };
+    getNotes();
+    return () => {
+      console.log("UNMOUNTED get notes");
+    };
+    // eslint-disable-next-line
+  }, [accessToken, setNotes, setIsLoading]);
+
   return (
     <Box style={{ display: "flex", width: "100%" }}>
       <Router>
@@ -24,8 +66,14 @@ const Home = () => {
             path="/"
             element={accessToken ? <Notes /> : <Navigate to="/login" />}
           />
-          <Route path="/archive" element={<Archives />} />
-          <Route path="/delete" element={<DeleteNotes />} />
+          <Route
+            path="/archive"
+            element={accessToken ? <Archives /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/delete"
+            element={accessToken ? <DeleteNotes /> : <Navigate to="/login" />}
+          />
           <Route path="/login" element={<Login />} />
         </Routes>
       </Router>

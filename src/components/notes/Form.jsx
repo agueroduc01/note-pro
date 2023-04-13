@@ -64,6 +64,8 @@ const Form = () => {
         formData.append("title", addNote.title);
         formData.append("content", addNote.content);
         formData.append("isPin", addNote.isPin);
+        formData.append("isArchived", note.isArchived);
+        formData.append("isRemoved", note.isRemoved);
         for (let i = 0; i < images.length; i++) {
           formData.append("images", images[i]);
           // clean up

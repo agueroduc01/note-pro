@@ -1,4 +1,12 @@
-import { Modal, Box, Typography, Input, Button } from "@mui/material";
+import {
+  Modal,
+  Box,
+  Typography,
+  Button,
+  TextField,
+  InputAdornment,
+  IconButton,
+} from "@mui/material";
 import { useState } from "react";
 import {
   changePasswordService,
@@ -16,6 +24,7 @@ import { toast } from "react-toastify";
 import { LoadingButton } from "@mui/lab";
 import { red } from "@mui/material/colors";
 import { createAxios } from "../../../utils/createInstance";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const style = {
   position: "absolute",
@@ -24,21 +33,34 @@ const style = {
   transform: "translate(-50%, -50%)",
   width: 400,
   bgcolor: "background.paper",
-  border: "2px solid #000",
+  borderRadius: 4,
   boxShadow: 24,
   p: 4,
   display: "flex",
   flexDirection: "column",
+  alignItems: "center",
 };
 
 const ChangePassword = (props) => {
   const { open, handleCloseFromParent } = props;
   const [newPassword, setNewPassword] = useState("");
   const [oldPassword, setOldPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showOldPassword, setShowOldPassword] = useState(false);
   const accessToken = useSelector((state) => state.user.login.accessToken);
   const isLoading = useSelector((state) => state.user.login.isFetching);
   const dispatch = useDispatch();
   let axiosJWT = createAxios(accessToken, dispatch, loginSuccess);
+
+  const handleClickShowPassword = () =>
+    setShowPassword((showPassword) => !showPassword);
+
+  const handleClickShowOldPassword = () =>
+    setShowOldPassword((showOldPassword) => !showOldPassword);
+
+  const handleMouseDownPassword = (event) => {
+    event.preventDefault();
+  };
 
   const handleChangePassword = async () => {
     try {
@@ -75,36 +97,60 @@ const ChangePassword = (props) => {
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
-          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-            Old Password
-          </Typography>
-          <Input
-            label="Your old password"
+          <Typography variant="h5">CHANGE PASSWORD</Typography>
+          <TextField
+            style={{ marginTop: "24px", width: "80%" }}
+            label="Old Password"
             placeholder="Enter your old password here..."
-            type="text"
+            type={showOldPassword ? "text" : "password"}
+            variant="outlined"
             onChange={(e) => setOldPassword(e.target.value)}
+            InputProps={{
+              style: { fontSize: "16px" },
+              endAdornment: (
+                <InputAdornment position="end" variant="standard">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowOldPassword}
+                    onMouseDown={handleMouseDownPassword}
+                  >
+                    {showOldPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
-          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-            New Password
-          </Typography>
-          <Input
-            label="Your new password"
+          <TextField
+            style={{ marginTop: "24px", width: "80%" }}
+            label="New Password"
+            variant="outlined"
+            type={showPassword ? "text" : "password"}
             placeholder="Enter your new password here..."
-            type="text"
             onChange={(e) => setNewPassword(e.target.value)}
+            InputProps={{
+              style: { fontSize: "16px" },
+              endAdornment: (
+                <InputAdornment position="end" variant="standard">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword}
+                    onMouseDown={handleMouseDownPassword}
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
           <div
             style={{
-              display: "flex",
               marginTop: "24px",
-              alignItems: "center",
-              justifyContent: "space-around",
             }}
           >
             <Button
               disabled={isLoading}
               onClick={handleClose}
-              style={{ backgroundColor: red[500] }}
+              style={{ backgroundColor: red[500], marginRight: "24px" }}
               variant="contained"
             >
               Cancel

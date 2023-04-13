@@ -25,6 +25,9 @@ import SendIcon from "@mui/icons-material/Send";
 import { toast } from "react-toastify";
 import AddMember from "../member/AddMember";
 import { useSelector } from "react-redux";
+import { createAxios } from "../../utils/createInstance";
+import { useDispatch } from "react-redux";
+import { loginSuccess } from "../../redux/authSlice";
 
 const EditNoteModal = (props) => {
   const { open, handleCloseFromParent, note } = props;
@@ -43,6 +46,8 @@ const EditNoteModal = (props) => {
   const [images, setImages] = useState(note.images);
   const [deleteImageIds, setDeleteImageIds] = useState([]);
   const [openAddMember, setOpenAddMember] = useState(false);
+  const dispatch = useDispatch();
+  let axiosJWT = createAxios(accessToken, dispatch, loginSuccess);
 
   const handleClose = async () => {
     try {
@@ -50,6 +55,8 @@ const EditNoteModal = (props) => {
       formData.append("title", title);
       formData.append("content", content);
       formData.append("isPin", isPin);
+      formData.append("isArchived", note.isArchived);
+      formData.append("isRemoved", note.isRemoved);
       formData.append("deleteImageIds", JSON.stringify(deleteImageIds));
       for (let i = 0; i < images.length; i++) {
         formData.append("images", images[i]);
@@ -59,7 +66,12 @@ const EditNoteModal = (props) => {
         }
       }
       setIsLoading2(true);
-      let data = await editNoteService(note.id, formData, accessToken);
+      let data = await editNoteService(
+        note.id,
+        formData,
+        accessToken,
+        axiosJWT
+      );
       setIsLoading2(false);
       toast.success(data.data.message);
       handleCloseFromParent(false);

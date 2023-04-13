@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 
 import { Box, Grid } from "@mui/material";
 import { styled } from "@mui/material/styles";
@@ -15,47 +15,19 @@ import SwipeDrawer from "../SwipeDrawer";
 import CardInfo from "../user/UserInfoHome/CardInfo";
 
 // Service
-import { getNotesService } from "../../services/note";
-import { toast } from "react-toastify";
 import Loading2 from "../loading/Loading2";
 import Loading3 from "../loading/Loading3";
 import { useSelector } from "react-redux";
-import { useDispatch } from "react-redux";
-import { createAxios } from "../../utils/createInstance";
-import { loginSuccess } from "../../redux/authSlice";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   ...theme.mixins.toolbar,
 }));
 
 const Notes = () => {
-  const { notes, setNotes, isLoading, setIsLoading, isLoading2, searchText } =
+  const { notes, setNotes, isLoading, isLoading2, searchText } =
     useContext(DataContext);
 
   const accessToken = useSelector((state) => state.user.login.accessToken);
-  const dispatch = useDispatch();
-  let axiosJWT = createAxios(accessToken, dispatch, loginSuccess);
-
-  useEffect(() => {
-    const getNotes = async () => {
-      setIsLoading(true);
-      try {
-        let data = await getNotesService(accessToken, axiosJWT);
-        setIsLoading(false);
-        if (data) {
-          setNotes(data.data.data);
-          toast.success(data.data.message);
-        }
-      } catch (error) {
-        toast.error(error.response.data.message);
-      }
-    };
-    getNotes();
-    return () => {
-      console.log("UNMOUNTED get notes");
-    };
-    // eslint-disable-next-line
-  }, [accessToken, setNotes, setIsLoading]);
 
   const onDragEnd = (result) => {
     if (!result.destination) return;
@@ -63,7 +35,7 @@ const Notes = () => {
     const items = reorder(notes, result.source.index, result.destination.index);
     setNotes(items);
   };
-  console.log("notesPinnedFromGetNotes", notes);
+
   return (
     <>
       <SwipeDrawer />

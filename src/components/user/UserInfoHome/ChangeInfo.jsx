@@ -30,20 +30,26 @@ const ChangeInfo = (props) => {
   let axiosJWT = createAxios(accessToken, dispatch, loginSuccess);
 
   const handleChangeInfor = async () => {
-    try {
-      let data = await changeInfoService(
-        fullName,
-        phoneNumber,
-        accessToken,
-        axiosJWT
-      );
-      if (data) {
-        updateUser(data.data.data);
-        toast.success(data.data.message);
-        handleClose();
+    if (phoneNumber && phoneNumber.substring(0, 1) === "0") {
+      try {
+        let data = await changeInfoService(
+          fullName,
+          phoneNumber,
+          accessToken,
+          axiosJWT
+        );
+        console.log("change info", data);
+        if (data) {
+          updateUser(data.data.data);
+          toast.success(data.data.message);
+          handleClose();
+        }
+      } catch (error) {
+        toast.error(error.response.data.message);
+        console.log(error.response);
       }
-    } catch (error) {
-      console.log(error.response);
+    } else {
+      toast.error("First character of phoneNumber must be '0'");
     }
   };
 
@@ -62,7 +68,7 @@ const ChangeInfo = (props) => {
         <Box sx={style}>
           <Typography variant="h5">CHANGE INFORMATION</Typography>
           <TextField
-            style={{ marginTop: "24px", width: "90%" }}
+            style={{ marginTop: "24px", width: "80%" }}
             variant="outlined"
             label="Fullname"
             placeholder="Enter your new full name here..."
@@ -74,14 +80,18 @@ const ChangeInfo = (props) => {
           />
 
           <TextField
-            style={{ marginTop: "24px" }}
+            style={{ marginTop: "24px", width: "80%" }}
             variant="outlined"
             label="Phone number"
             placeholder="Enter your new phone number here..."
             type="text"
             onChange={(e) => setPhoneNumber(e.target.value)}
           />
-          <Button onClick={handleChangeInfor} style={{ marginTop: "20px" }}>
+          <Button
+            onClick={handleChangeInfor}
+            style={{ marginTop: "20px" }}
+            color="primary"
+          >
             Change
           </Button>
         </Box>

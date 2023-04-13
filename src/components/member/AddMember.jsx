@@ -24,6 +24,9 @@ import { DataContext } from "../../context/DataProvider";
 import { toast } from "react-toastify";
 import EditMember from "./EditMember";
 import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { createAxios } from "../../utils/createInstance";
+import { loginSuccess } from "../../redux/authSlice";
 
 const AddMember = (props) => {
   const { open, handleCloseFromParent, note } = props;
@@ -34,11 +37,19 @@ const AddMember = (props) => {
   const [openEditMember, setOpenEditMember] = useState(false);
   const [editMember, setEditMember] = useState(null);
   const divInputRef = useRef();
+  const dispatch = useDispatch();
+  let axiosJWT = createAxios(accessToken, dispatch, loginSuccess);
 
   useEffect(() => {
     const getMembers = async () => {
       try {
-        let data = await getMembersService(accessToken, note.id, 0, 10);
+        let data = await getMembersService(
+          accessToken,
+          note.id,
+          0,
+          10,
+          axiosJWT
+        );
         setMembers(data.data.data.data);
         toast.success(data.data.message);
       } catch (error) {
@@ -50,6 +61,7 @@ const AddMember = (props) => {
     return () => {
       divInputRef.current = false;
     };
+    //eslint-disable-next-line
   }, [accessToken, note]);
 
   const handleClose = () => {
@@ -59,10 +71,15 @@ const AddMember = (props) => {
   const handleAddMember = async () => {
     setIsLoading2(true);
     try {
-      let data = await addMemberService(note.id, accessToken, {
-        email,
-        role: "editor",
-      });
+      let data = await addMemberService(
+        note.id,
+        accessToken,
+        {
+          email,
+          role: "editor",
+        },
+        axiosJWT
+      );
       setIsLoading2(false);
       toast.success(data.data.message);
       setMembers([...members, data.data.data]);
@@ -80,7 +97,8 @@ const AddMember = (props) => {
       let data = await deleteMemberService(
         note.id,
         accessToken,
-        memberInput.id
+        memberInput.id,
+        axiosJWT
       );
       const updateMembers = members.filter(
         (member) => member.id !== memberInput.id

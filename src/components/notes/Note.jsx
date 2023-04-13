@@ -20,10 +20,13 @@ import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternate
 import { DataContext } from "../../context/DataProvider";
 
 import EditNoteModal from "./EditNoteModal";
-import { deleteNoteService, editNoteService } from "../../services/note";
+import { editNoteService } from "../../services/note";
 import { toast } from "react-toastify";
 import AddMember from "../member/AddMember";
 import { useSelector } from "react-redux";
+import { createAxios } from "../../utils/createInstance";
+import { useDispatch } from "react-redux";
+import { loginSuccess } from "../../redux/authSlice";
 
 const StyledCard = styled(Card)`
   border: 1px solid #e0e0e0;
@@ -34,16 +37,13 @@ const StyledCard = styled(Card)`
 `;
 
 const Note = ({ note }) => {
-  const {
-    notes,
-    setNotes,
-    setAcrchiveNotes,
-    // setDeleteNotes,
-    setIsLoading,
-  } = useContext(DataContext);
+  const { notes, setNotes, setAcrchiveNotes, setDeleteNotes, setIsLoading } =
+    useContext(DataContext);
   const accessToken = useSelector((state) => state.user.login.accessToken);
   const [openEditNote, setOpenEditNote] = useState(false);
   const [openAddMember, setOpenAddMember] = useState(false);
+  const dispatch = useDispatch();
+  let axiosJWT = createAxios(accessToken, dispatch, loginSuccess);
 
   useEffect(() => {
     return () => {
@@ -51,27 +51,67 @@ const Note = ({ note }) => {
     };
   }, []);
 
-  const archiveNote = (note) => {
-    const updatedNotes = notes.filter((data) => data.id !== note.id);
-    setNotes(updatedNotes);
-    setAcrchiveNotes((prevArr) => [note, ...prevArr]);
+  const archiveNote = async (note) => {
+    try {
+      const formData = new FormData();
+      formData.append("title", note.title);
+      formData.append("content", note.content);
+      formData.append("isPin", note.isPin);
+      formData.append("isArchived", !note.isArchived);
+      formData.append("isRemoved", note.isRemoved);
+      formData.append("deleteImageIds", JSON.stringify([]));
+      formData.append("images", note.images);
+      setIsLoading(true);
+      let data = await editNoteService(
+        note.id,
+        formData,
+        accessToken,
+        axiosJWT
+      );
+      setIsLoading(false);
+      if (data) {
+        if (data.data.data.isArchived === true) {
+          toast.success("Archive successfully!");
+          const updatedNotes = notes.filter((data) => data.id !== note.id);
+          setNotes(updatedNotes);
+          setAcrchiveNotes((prevArr) => [data.data.data, ...prevArr]);
+        }
+      }
+    } catch (error) {
+      setIsLoading(false);
+      toast.error(error.status, error.response.data.message);
+    }
   };
 
   const deleteNote = async (note) => {
     try {
+      const formData = new FormData();
+      formData.append("title", note.title);
+      formData.append("content", note.content);
+      formData.append("isPin", note.isPin);
+      formData.append("isArchived", note.isArchived);
+      formData.append("isRemoved", !note.isRemoved);
+      formData.append("deleteImageIds", JSON.stringify([]));
+      formData.append("images", note.images);
       setIsLoading(true);
-      let data = await deleteNoteService(note, accessToken);
+      let data = await editNoteService(
+        note.id,
+        formData,
+        accessToken,
+        axiosJWT
+      );
       setIsLoading(false);
-      console.log("deleteNote", data.data);
-      if (data.data) {
-        const updatedPinNotes = notes.filter((data) => data.id !== note.id);
-        setNotes(updatedPinNotes);
-        // setDeleteNotes((prevArr) => [note, ...prevArr]);
-        toast.success(data.data.message);
+      if (data) {
+        if (data.data.data.isRemoved === true) {
+          toast.success("Remove note to bin trash successfully!");
+        }
+        const updatedNotes = notes.filter((data) => data.id !== note.id);
+        setNotes(updatedNotes);
+        setDeleteNotes((prevArr) => [data.data.data, ...prevArr]);
       }
     } catch (error) {
       setIsLoading(false);
-      toast.success(error.response);
+      toast.error(error.status, error.response.data.message);
     }
   };
 
@@ -85,10 +125,17 @@ const Note = ({ note }) => {
       formData.append("title", note.title);
       formData.append("content", note.content);
       formData.append("isPin", !note.isPin);
+      formData.append("isArchived", note.isArchived);
+      formData.append("isRemoved", note.isRemoved);
       formData.append("deleteImageIds", JSON.stringify([]));
       formData.append("images", note.images);
       setIsLoading(true);
-      let data = await editNoteService(note.id, formData, accessToken);
+      let data = await editNoteService(
+        note.id,
+        formData,
+        accessToken,
+        axiosJWT
+      );
       setIsLoading(false);
       if (data) {
         if (data.data.data.isPin) {
@@ -125,12 +172,19 @@ const Note = ({ note }) => {
       formData.append("title", note.title);
       formData.append("content", note.content);
       formData.append("isPin", note.isPin);
+      formData.append("isArchived", note.isArchived);
+      formData.append("isRemoved", note.isRemoved);
       formData.append("deleteImageIds", JSON.stringify([]));
       for (let i = 0; i < images.length; i++) {
         formData.append("images", images[i]);
       }
       try {
-        let data = await editNoteService(note.id, formData, accessToken);
+        let data = await editNoteService(
+          note.id,
+          formData,
+          accessToken,
+          axiosJWT
+        );
         setIsLoading(false);
 
         // PREVIEW IMAGES , CLEANUP WHEN DELETE NOTE

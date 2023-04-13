@@ -7,6 +7,9 @@ import { useState } from "react";
 import { editMemberService } from "../../services/member";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { createAxios } from "../../utils/createInstance";
+import { loginSuccess } from "../../redux/authSlice";
 
 const style = {
   position: "absolute",
@@ -28,6 +31,8 @@ const EditMember = (props) => {
   const accessToken = useSelector((state) => state.user.login.accessToken);
   const [role, setRole] = useState(member.role);
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+  let axiosJWT = createAxios(accessToken, dispatch, loginSuccess);
 
   const handleChange = (event) => {
     setRole(event.target.value);
@@ -40,10 +45,15 @@ const EditMember = (props) => {
   const handleSubmitEdit = async () => {
     setLoading(true);
     try {
-      let data = await editMemberService(note.id, accessToken, {
-        ...member,
-        role: role,
-      });
+      let data = await editMemberService(
+        note.id,
+        accessToken,
+        {
+          ...member,
+          role: role,
+        },
+        axiosJWT
+      );
       if (data) {
         setLoading(false);
         const updateMembers = members.filter(

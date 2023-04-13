@@ -1,7 +1,5 @@
-import axios from "axios";
-
-const editNote = (noteId, formData, accessToken) => {
-  return axios.put(
+const editNote = (noteId, formData, accessToken, axiosJWT) => {
+  return axiosJWT.put(
     `http://localhost:3000/api/v1/notes/edit-note?id=${noteId}`,
     formData,
     {
