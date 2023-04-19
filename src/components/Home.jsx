@@ -56,7 +56,7 @@ const Home = () => {
       console.log("UNMOUNTED get notes");
     };
     // eslint-disable-next-line
-  }, [accessToken, setNotes, setIsLoading]);
+  }, []);
 
   return (
     <Box style={{ display: "flex", width: "100%" }}>

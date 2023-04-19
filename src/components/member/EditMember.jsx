@@ -64,6 +64,7 @@ const EditMember = (props) => {
         toast.success(data.data.message);
       }
     } catch (error) {
+      setLoading(false);
       toast.error(error.response.status, error.response.data);
     }
   };

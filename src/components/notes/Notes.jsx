@@ -29,11 +29,34 @@ const Notes = () => {
 
   const accessToken = useSelector((state) => state.user.login.accessToken);
 
-  const onDragEnd = (result) => {
+  const onDragEndPinned = (result) => {
     if (!result.destination) return;
 
-    const items = reorder(notes, result.source.index, result.destination.index);
-    setNotes(items);
+    const notesPinned = notes.filter((note) => note.isPin === true);
+    const notesUnPinned = notes.filter((note) => note.isPin === false);
+
+    const items = reorder(
+      notesPinned,
+      result.source.index,
+      result.destination.index
+    );
+
+    setNotes(notesUnPinned.concat(items));
+  };
+
+  const onDragEndUnPinned = (result) => {
+    if (!result.destination) return;
+
+    const notesPinned = notes.filter((note) => note.isPin === true);
+    const notesUnPinned = notes.filter((note) => note.isPin === false);
+
+    const items = reorder(
+      notesUnPinned,
+      result.source.index,
+      result.destination.index
+    );
+
+    setNotes(notesPinned.concat(items));
   };
 
   return (
@@ -51,7 +74,7 @@ const Notes = () => {
                   .filter((note) =>
                     note.title.toLowerCase().includes(searchText.toLowerCase())
                   ).length > 0 && <h5>Được ghim</h5>}
-                <DragDropContext onDragEnd={onDragEnd}>
+                <DragDropContext onDragEnd={onDragEndPinned}>
                   <Droppable droppableId="droppable">
                     {(provided, snapshot) => (
                       <Grid
@@ -103,7 +126,7 @@ const Notes = () => {
           {accessToken &&
             (notes.filter((note) => note.isPin === false).length > 0 ||
             notes.filter((note) => note.isPin === true).length > 0 ? (
-              <DragDropContext onDragEnd={onDragEnd}>
+              <DragDropContext onDragEnd={onDragEndUnPinned}>
                 <br />
                 {notes.filter((note) => note.isPin === true).length > 0 &&
                   notes.filter((note) => note.isPin === false).length > 0 &&
