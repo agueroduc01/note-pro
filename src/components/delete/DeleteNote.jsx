@@ -23,14 +23,19 @@ import { loginSuccess } from "../../redux/authSlice";
 const StyledCard = styled(Card)`
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  width: 240px;
+  min-width: 240px;
   margin: 8px;
   box-shadow: none;
 `;
 
 const DeleteNote = ({ deleteNote }) => {
-  const { deleteNotes, setNotes, setDeleteNotes, setIsLoading } =
-    useContext(DataContext);
+  const {
+    deleteNotes,
+    setNotes,
+    setDeleteNotes,
+    setIsLoading,
+    setAcrchiveNotes,
+  } = useContext(DataContext);
   const accessToken = useSelector((state) => state.user.login.accessToken);
   const dispatch = useDispatch();
   let axiosJWT = createAxios(accessToken, dispatch, loginSuccess);
@@ -60,7 +65,11 @@ const DeleteNote = ({ deleteNote }) => {
             (data) => data.id !== deleteNote.id
           );
           setDeleteNotes(updatedNotes);
-          setNotes((prevArr) => [data.data.data, ...prevArr]);
+          if (data.data.data.isArchived === true) {
+            setAcrchiveNotes((prevArr) => [data.data.data, ...prevArr]);
+          } else {
+            setNotes((prevArr) => [data.data.data, ...prevArr]);
+          }
         }
       }
     } catch (error) {
@@ -88,77 +97,79 @@ const DeleteNote = ({ deleteNote }) => {
   };
 
   return (
-    <StyledCard>
-      {deleteNote.images && deleteNote.images.length > 0 && (
-        <CardContent
-          // onClick={handleOpenEditNote}
-          style={{
-            paddingBottom: "0",
-            paddingRight: "32px",
-          }}
-        >
-          <Grid container spacing={deleteNote.images.length}>
-            {deleteNote.images.map((image, index) => (
-              <Grid item key={index} style={{ height: "220px" }}>
-                <img
-                  src={image.url}
-                  alt="images"
-                  style={{
-                    height: "100%",
-                  }}
-                />
-              </Grid>
-            ))}
-          </Grid>
+    <>
+      <StyledCard>
+        {deleteNote.images && deleteNote.images.length > 0 && (
+          <CardContent
+            // onClick={handleOpenEditNote}
+            style={{
+              paddingBottom: "0",
+              paddingRight: "32px",
+            }}
+          >
+            <Grid container spacing={deleteNote.images.length}>
+              {deleteNote.images.map((image, index) => (
+                <Grid item key={index} style={{ height: "220px" }}>
+                  <img
+                    src={image.url}
+                    alt="images"
+                    style={{
+                      height: "100%",
+                    }}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          </CardContent>
+        )}
+        <CardContent>
+          <Typography
+            style={{
+              fontSize: "1.25rem",
+              fontWeight: 600,
+              padding: "2px 10px 0 0",
+              cursor: "pointer",
+            }}
+          >
+            {deleteNote.title}
+          </Typography>
+          <Typography
+            gutterBottom
+            style={{
+              padding: "4px 10px 0 0",
+              cursor: "pointer",
+            }}
+          >
+            {deleteNote.content}
+          </Typography>
         </CardContent>
-      )}
-      <CardContent>
-        <Typography
-          style={{
-            fontSize: "1.25rem",
-            fontWeight: 600,
-            padding: "2px 10px 0 0",
-            cursor: "pointer",
-          }}
-        >
-          {deleteNote.title}
-        </Typography>
-        <Typography
-          gutterBottom
-          style={{
-            padding: "4px 10px 0 0",
-            cursor: "pointer",
-          }}
-        >
-          {deleteNote.content}
-        </Typography>
-      </CardContent>
-      <CardActions>
-        <Delete
-          fontSize="small"
-          style={{ marginLeft: "auto" }}
-          onClick={() => removeNote(deleteNote)}
-          sx={{
-            "&:hover": {
-              background: "#848687",
-              borderRadius: "50%",
-              cursor: "pointer",
-            },
-          }}
-        />
-        <Restore
-          fontSize="small"
-          onClick={() => restoreNote(deleteNote)}
-          sx={{
-            "&:hover": {
-              background: "#848687",
-              borderRadius: "50%",
-              cursor: "pointer",
-            },
-          }}
-        />
-      </CardActions>
-    </StyledCard>
+        <CardActions>
+          <Delete
+            fontSize="small"
+            style={{ marginLeft: "auto" }}
+            onClick={() => removeNote(deleteNote)}
+            sx={{
+              "&:hover": {
+                background: "#848687",
+                borderRadius: "50%",
+                cursor: "pointer",
+              },
+            }}
+          />
+          <Restore
+            fontSize="small"
+            onClick={() => restoreNote(deleteNote)}
+            sx={{
+              "&:hover": {
+                background: "#848687",
+                borderRadius: "50%",
+                cursor: "pointer",
+              },
+            }}
+          />
+        </CardActions>
+      </StyledCard>
+    </>
   );
 };
 

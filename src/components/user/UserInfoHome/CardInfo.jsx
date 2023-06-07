@@ -5,31 +5,40 @@ import {
   Button,
   Avatar,
   IconButton,
-} from "@mui/material";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { red } from "@mui/material/colors";
-import { useEffect, useState } from "react";
-import { detailService } from "../../../services/user";
-import ChangeInfo from "./ChangeInfo";
-import ChangePassword from "./ChangePassword";
-import { useSelector } from "react-redux";
-import { createAxios } from "../../../utils/createInstance";
-import { useDispatch } from "react-redux";
-import { loginSuccess } from "../../../redux/authSlice";
+  Snackbar,
+} from '@mui/material';
+import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { red } from '@mui/material/colors';
+import { useEffect, useState } from 'react';
+import { detailService } from '../../../services/user';
+import ChangeInfo from './ChangeInfo';
+import ChangePassword from './ChangePassword';
+import { useSelector } from 'react-redux';
+import { createAxios } from '../../../utils/createInstance';
+import { useDispatch } from 'react-redux';
+import { loginSuccess } from '../../../redux/authSlice';
+import Logout from './Logout';
+import CloseIcon from '@mui/icons-material/Close';
 
 const CardInfo = () => {
   const accessToken = useSelector((state) => state.user.login.accessToken);
   const [detailUser, setDetailUser] = useState({});
   const [openChangeInfo, setOpenChangeInfo] = useState(false);
   const [openChangePassword, setOpenChangePassword] = useState(false);
+  const [openLogout, setOpenLogout] = useState(false);
   const dispatch = useDispatch();
   let axiosJWT = createAxios(accessToken, dispatch, loginSuccess);
 
   useEffect(() => {
+    let ignore = false;
+
     const getDetailUser = async () => {
       try {
         let data = await detailService(accessToken, axiosJWT);
-        setDetailUser(data.data.data);
+        if (!ignore) {
+          setDetailUser(data.data.data);
+        }
       } catch (error) {
         console.log(error.response);
       }
@@ -37,7 +46,8 @@ const CardInfo = () => {
     getDetailUser();
 
     return () => {
-      setDetailUser({});
+      // setDetailUser({});
+      ignore = true;
     };
     // eslint-disable-next-line
   }, [accessToken]);
@@ -50,7 +60,32 @@ const CardInfo = () => {
     setOpenChangePassword(false);
   };
 
-  const handleLogOut = async () => {};
+  const [openSetting, setOpenSetting] = useState(false);
+
+  const handleClick = () => {
+    setOpenSetting(true);
+  };
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpenSetting(false);
+  };
+
+  const action = (
+    <>
+      <IconButton
+        size="small"
+        aria-label="close"
+        color="inherit"
+        onClick={handleClose}
+      >
+        <CloseIcon fontSize="small" />
+      </IconButton>
+    </>
+  );
 
   return (
     <>
@@ -61,11 +96,11 @@ const CardInfo = () => {
               {detailUser &&
                 (detailUser.fullName
                   ? detailUser.fullName.substring(0, 1)
-                  : " ")}
+                  : ' ')}
             </Avatar>
           }
           action={
-            <IconButton aria-label="settings">
+            <IconButton aria-label="settings" onClick={handleClick}>
               <MoreVertIcon />
             </IconButton>
           }
@@ -74,9 +109,9 @@ const CardInfo = () => {
         />
         <CardContent
           style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
           }}
         >
           <Button
@@ -95,8 +130,19 @@ const CardInfo = () => {
           >
             Change Password
           </Button>
-          <Button color="error" size="large" onClick={handleLogOut}>
-            Log Out
+          <Button
+            color="error"
+            size="large"
+            onClick={() => setOpenLogout(true)}
+          >
+            <span>Log Out</span>
+            <LogoutOutlinedIcon
+              sx={{
+                fontWeight: 300,
+                marginLeft: 2,
+                fontSize: 20,
+              }}
+            />
           </Button>
         </CardContent>
       </Card>
@@ -113,6 +159,16 @@ const CardInfo = () => {
           handleCloseFromParent={handleCloseChangePassword}
         />
       )}
+      {openLogout && (
+        <Logout open={openLogout} handleCloseFromParent={setOpenLogout} />
+      )}
+      <Snackbar
+        open={openSetting}
+        autoHideDuration={4000}
+        onClose={handleClose}
+        message="This feature was maintained"
+        action={action}
+      />
     </>
   );
 };

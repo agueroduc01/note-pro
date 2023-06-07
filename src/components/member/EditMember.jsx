@@ -1,24 +1,24 @@
-import { Box, Modal, Button, FormControl, Typography } from "@mui/material";
-import LoadingButton from "@mui/lab/LoadingButton";
-import { MenuItem, Select, InputLabel } from "@mui/material";
-import { red } from "@mui/material/colors";
+import { Box, Modal, Button, FormControl, Typography } from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
+import { MenuItem, Select, InputLabel } from '@mui/material';
+import { red } from '@mui/material/colors';
 
-import { useState } from "react";
-import { editMemberService } from "../../services/member";
-import { toast } from "react-toastify";
-import { useSelector } from "react-redux";
-import { useDispatch } from "react-redux";
-import { createAxios } from "../../utils/createInstance";
-import { loginSuccess } from "../../redux/authSlice";
+import { useState } from 'react';
+import { editMemberService } from '../../services/member';
+import { toast } from 'react-toastify';
+import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
+import { createAxios } from '../../utils/createInstance';
+import { loginSuccess } from '../../redux/authSlice';
 
 const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
   width: 400,
-  bgcolor: "background.paper",
-  border: "2px solid #000",
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
   boxShadow: 24,
   pt: 2,
   px: 4,
@@ -65,7 +65,7 @@ const EditMember = (props) => {
       }
     } catch (error) {
       setLoading(false);
-      toast.error(error.response.status, error.response.data);
+      toast.error(error.response.data.message);
     }
   };
 
@@ -80,9 +80,9 @@ const EditMember = (props) => {
           <Typography
             mt={2}
             style={{
-              fontSize: "1.45rem",
-              fontWeight: "bold",
-              textAlign: "center",
+              fontSize: '1.45rem',
+              fontWeight: 'bold',
+              textAlign: 'center',
             }}
           >
             {member.fullName}
@@ -90,9 +90,9 @@ const EditMember = (props) => {
           <Typography
             mt={2}
             style={{
-              fontSize: "1rem",
-              fontWeight: "450",
-              textAlign: "center",
+              fontSize: '1rem',
+              fontWeight: '450',
+              textAlign: 'center',
             }}
           >
             {member.email}
@@ -101,9 +101,9 @@ const EditMember = (props) => {
             mt={2}
             mb={3}
             style={{
-              fontSize: "1rem",
-              fontWeight: "450",
-              textAlign: "center",
+              fontSize: '1rem',
+              fontWeight: '450',
+              textAlign: 'center',
             }}
           >
             {note.id}
@@ -117,8 +117,8 @@ const EditMember = (props) => {
               label="Role"
               onChange={handleChange}
             >
-              <MenuItem value={"editor"}>Editor</MenuItem>
-              <MenuItem value={"viewer"}>Viewer</MenuItem>
+              <MenuItem value={'editor'}>Editor</MenuItem>
+              <MenuItem value={'viewer'}>Viewer</MenuItem>
             </Select>
           </FormControl>
           <Button
@@ -135,7 +135,7 @@ const EditMember = (props) => {
             loading={loading}
             variant="contained"
             style={{
-              position: "absolute",
+              position: 'absolute',
               right: 25,
             }}
           >

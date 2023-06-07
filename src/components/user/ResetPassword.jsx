@@ -1,16 +1,25 @@
-import { useState } from "react";
-import { Button, Modal, Box, Typography, Input } from "@mui/material";
-import { resetPasswordService } from "../../services/user";
-import { toast } from "react-toastify";
+import { useState } from 'react';
+import {
+  Button,
+  Modal,
+  Box,
+  Typography,
+  InputAdornment,
+  IconButton,
+  TextField,
+} from '@mui/material';
+import { resetPasswordService } from '../../services/user';
+import { toast } from 'react-toastify';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
   width: 400,
-  bgcolor: "background.paper",
-  border: "2px solid #000",
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
   boxShadow: 24,
   pt: 2,
   px: 4,
@@ -19,8 +28,15 @@ const style = {
 
 const ChildModal = (props) => {
   const { open, handleCloseFromParent, handleCloseParentSendmail } = props;
-  const [codeVerify, setCodeVerify] = useState("");
-  const [newPassword, setNewPassword] = useState("");
+  const [codeVerify, setCodeVerify] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+  const handleMouseDownPassword = (event) => {
+    event.preventDefault();
+  };
 
   const handleVerify = async () => {
     if (codeVerify && newPassword) {
@@ -37,7 +53,7 @@ const ChildModal = (props) => {
         toast.error(error.response.data.message, error.response.status);
       }
     } else {
-      toast.error("All inputs are required");
+      toast.error('All inputs are required');
     }
   };
 
@@ -54,25 +70,50 @@ const ChildModal = (props) => {
         aria-describedby="child-modal-description"
       >
         <Box sx={{ ...style, width: 200 }}>
-          <Typography variant="h6" component="h2">
-            CodeVerify Here
-          </Typography>
-          <Input
-            label="Your code verify"
-            type="text"
+          <TextField
+            id="input-code-verification"
+            label={
+              <Typography variant="headline" component="h3">
+                Your code
+              </Typography>
+            }
+            style={{ marginBottom: '20px', marginTop: '20px' }}
+            type="email"
+            variant="outlined"
             onChange={(e) => setCodeVerify(e.target.value)}
+            InputProps={{ style: { fontSize: '16px' } }}
           />
 
-          <Typography variant="h6" component="h2">
-            New Password
-          </Typography>
-          <Input
-            label="Your new password"
-            type="text"
+          <TextField
+            id="input-password"
+            label={
+              <Typography variant="headline" component="h3">
+                New password
+              </Typography>
+            }
+            style={{ marginBottom: '20px' }}
+            type={showPassword ? 'text' : 'password'}
+            variant="outlined"
             onChange={(e) => setNewPassword(e.target.value)}
+            InputProps={{
+              style: { fontSize: '16px' },
+              endAdornment: (
+                <InputAdornment position="end" variant="standard">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword}
+                    onMouseDown={handleMouseDownPassword}
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
 
-          <Button onClick={handleVerify}>Verify</Button>
+          <Button style={{ justifyContent: 'center' }} onClick={handleVerify}>
+            Verify
+          </Button>
         </Box>
       </Modal>
     </>

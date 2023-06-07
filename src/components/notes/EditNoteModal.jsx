@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState } from 'react';
 import {
   TextField,
   Dialog,
@@ -6,33 +6,34 @@ import {
   CardActions,
   Grid,
   DialogContent,
-} from "@mui/material";
+} from '@mui/material';
 import {
   ArchiveOutlined as Archive,
   DeleteOutlineOutlined as Delete,
-} from "@mui/icons-material";
-import PushPinIcon from "@mui/icons-material/PushPin";
-import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
-import GroupAddOutlinedIcon from "@mui/icons-material/GroupAddOutlined";
-import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
-import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
+} from '@mui/icons-material';
+import PushPinIcon from '@mui/icons-material/PushPin';
+import PushPinOutlinedIcon from '@mui/icons-material/PushPinOutlined';
+import GroupAddOutlinedIcon from '@mui/icons-material/GroupAddOutlined';
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
+import AddPhotoAlternateOutlinedIcon from '@mui/icons-material/AddPhotoAlternateOutlined';
 
-import { DataContext } from "../../context/DataProvider";
-import { editNoteService } from "../../services/note";
+import { DataContext } from '../../context/DataProvider';
+import { editNoteService } from '../../services/note';
 
-import LoadingButton from "@mui/lab/LoadingButton";
-import SendIcon from "@mui/icons-material/Send";
-import { toast } from "react-toastify";
-import AddMember from "../member/AddMember";
-import { useSelector } from "react-redux";
-import { createAxios } from "../../utils/createInstance";
-import { useDispatch } from "react-redux";
-import { loginSuccess } from "../../redux/authSlice";
+import LoadingButton from '@mui/lab/LoadingButton';
+import SendIcon from '@mui/icons-material/Send';
+import { toast } from 'react-toastify';
+import AddMember from '../member/AddMember';
+import { useSelector } from 'react-redux';
+import { createAxios } from '../../utils/createInstance';
+import { useDispatch } from 'react-redux';
+import { loginSuccess } from '../../redux/authSlice';
 
 const EditNoteModal = (props) => {
   const { open, handleCloseFromParent, note } = props;
   const {
     notes,
+    archiveNotes,
     setNotes,
     setAcrchiveNotes,
     setDeleteNotes,
@@ -52,16 +53,16 @@ const EditNoteModal = (props) => {
   const handleClose = async () => {
     try {
       const formData = new FormData();
-      formData.append("title", title);
-      formData.append("content", content);
-      formData.append("isPin", isPin);
-      formData.append("isArchived", note.isArchived);
-      formData.append("isRemoved", note.isRemoved);
-      formData.append("deleteImageIds", JSON.stringify(deleteImageIds));
+      formData.append('title', title);
+      formData.append('content', content);
+      formData.append('isPin', isPin);
+      formData.append('isArchived', note.isArchived);
+      formData.append('isRemoved', note.isRemoved);
+      formData.append('deleteImageIds', JSON.stringify(deleteImageIds));
       for (let i = 0; i < images.length; i++) {
-        formData.append("images", images[i]);
+        formData.append('images', images[i]);
         // clean up
-        if (images[i].url.includes("localhost")) {
+        if (images[i].url.includes('localhost')) {
           URL.revokeObjectURL(images[i].url);
         }
       }
@@ -75,42 +76,105 @@ const EditNoteModal = (props) => {
       setIsLoading2(false);
       toast.success(data.data.message);
       handleCloseFromParent(false);
-      if (data.data) {
+      if (data.data.data.isArchived === false) {
         const updatedPinNotes = notes.filter((data) => data.id !== note.id);
         updatedPinNotes.push(data.data.data);
         setNotes(updatedPinNotes);
+      } else {
+        const updatedArchivedNotes = archiveNotes.filter(
+          (data) => data.id !== note.id
+        );
+        setAcrchiveNotes([data.data.data, ...updatedArchivedNotes]);
       }
     } catch (error) {
       setIsLoading2(false);
-      toast.error(error.response);
+      toast.error(error.response.data.message);
     }
   };
 
-  const archiveNote = (note) => {
-    handleCloseFromParent(false);
-    const updatedNotes = notes.filter((data) => data.id !== note.id);
-    setNotes(updatedNotes);
-    setAcrchiveNotes((prevArr) => [note, ...prevArr]);
+  const archiveNote = async (note) => {
+    try {
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('content', content);
+      formData.append('isPin', isPin);
+      formData.append('isArchived', !note.isArchived);
+      formData.append('isRemoved', note.isRemoved);
+      formData.append('deleteImageIds', JSON.stringify(deleteImageIds));
+      for (let i = 0; i < images.length; i++) {
+        formData.append('images', images[i]);
+        // clean up
+        if (images[i].url.includes('localhost')) {
+          URL.revokeObjectURL(images[i].url);
+        }
+      }
+      setIsLoading2(true);
+      let data = await editNoteService(
+        note.id,
+        formData,
+        accessToken,
+        axiosJWT
+      );
+      setIsLoading2(false);
+      if (data.data.data.isArchived === true) {
+        toast.success('Archive successfully!');
+        const updatedNotes = notes.filter((data) => data.id !== note.id);
+        setNotes(updatedNotes);
+        setAcrchiveNotes((prevArr) => [data.data.data, ...prevArr]);
+      }
+    } catch (error) {
+      setIsLoading2(false);
+      toast.error(error.response.data.message);
+    }
   };
 
-  const deleteNote = (note) => {
-    handleCloseFromParent(false);
-    const updatedNotes = notes.filter((data) => data.id !== note.id);
-    setNotes(updatedNotes);
-    setDeleteNotes((prevArr) => [note, ...prevArr]);
+  const deleteNote = async (note) => {
+    try {
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('content', content);
+      formData.append('isPin', isPin);
+      formData.append('isArchived', note.isArchived);
+      formData.append('isRemoved', !note.isRemoved);
+      formData.append('deleteImageIds', JSON.stringify(deleteImageIds));
+      for (let i = 0; i < images.length; i++) {
+        formData.append('images', images[i]);
+        // clean up
+        if (images[i].url.includes('localhost')) {
+          URL.revokeObjectURL(images[i].url);
+        }
+      }
+      setIsLoading2(true);
+      let data = await editNoteService(
+        note.id,
+        formData,
+        accessToken,
+        axiosJWT
+      );
+      setIsLoading2(false);
+      if (data.data.data.isRemoved === true) {
+        toast.success('Remove note to bin trash successfully!');
+        const updatedNotes = notes.filter((data) => data.id !== note.id);
+        setNotes(updatedNotes);
+        setDeleteNotes((prevArr) => [data.data.data, ...prevArr]);
+      }
+    } catch (error) {
+      setIsLoading2(false);
+      toast.error(error.response.data.message);
+    }
   };
 
   const handleClickAddPhoto = (note) => {
     let inputTag = document
       .querySelector(`[data-id='${note.id}'`)
-      .querySelector(".inputImages");
+      .querySelector('.inputImages');
     inputTag.click();
   };
 
   const onChangeImage = async () => {
     let inputTag = document
       .querySelector(`[data-id='${note.id}'`)
-      .querySelector(".inputImages");
+      .querySelector('.inputImages');
     console.log(inputTag.files);
     const imagesChoosen = inputTag.files;
     if (imagesChoosen.length > 0) {
@@ -118,20 +182,21 @@ const EditNoteModal = (props) => {
       for (let i = 0; i < imagesChoosen.length; i++) {
         let file = imagesChoosen[i];
         file.url = URL.createObjectURL(file);
+        console.log(file);
         setImages((prevArr) => [file, ...prevArr]);
       }
-      toast.success("Upload successfully!");
+      toast.success('Upload successfully!');
       setIsLoading2(false);
     }
   };
-  console.log("images", open, images.length);
+  console.log('images', open, images.length);
 
   const handleToggleIsPin = async () => {
     setIsPin(!isPin);
     if (isPin) {
-      toast.success("Pin successfully");
+      toast.success('Pin successfully');
     } else {
-      toast.success("Unpin successfully");
+      toast.success('Unpin successfully');
     }
   };
 
@@ -144,20 +209,24 @@ const EditNoteModal = (props) => {
     }
   };
 
+  const handlePreviewImageOnClick = (image) => {
+    window.open(image.url);
+  };
+
   return (
     <>
       <Dialog
         open={open}
         onClose={handleClose}
-        scroll={"paper"}
+        scroll={'paper'}
         aria-labelledby="scroll-dialog-title"
         aria-describedby="scroll-dialog-description"
         data-id={note.id}
         sx={{
-          "& .MuiDialog-container": {
-            "& .MuiPaper-root": {
-              width: "100%",
-              maxWidth: "680px",
+          '& .MuiDialog-container': {
+            '& .MuiPaper-root': {
+              width: '100%',
+              maxWidth: '680px',
             },
           },
         }}
@@ -173,8 +242,8 @@ const EditNoteModal = (props) => {
                 container
                 spacing={images.length}
                 style={{
-                  width: "100%",
-                  position: "relative",
+                  width: '100%',
+                  position: 'relative',
                 }}
                 // window.onbeforeunload = function() {}
               >
@@ -183,34 +252,35 @@ const EditNoteModal = (props) => {
                     item
                     key={index}
                     style={{
-                      height: images.length > 1 ? "220px" : "100%",
-                      position: "relative",
+                      height: images.length > 1 ? '220px' : '100%',
+                      position: 'relative',
                     }}
                     sx={{
-                      "&:hover": {
+                      '&:hover': {
                         opacity: 0.8,
-                        cursor: "pointer",
+                        cursor: 'pointer',
                       },
                     }}
                     id={image.id}
+                    onClick={() => handlePreviewImageOnClick(image)}
                   >
                     <img
                       src={image.url}
                       alt="images"
                       style={{
-                        height: "100%",
-                        width: "100%",
+                        height: '100%',
+                        width: '100%',
                       }}
                     />
                     <DeleteOutlineOutlinedIcon
                       sx={{
-                        "&:hover": {
+                        '&:hover': {
                           opacity: 1,
-                          color: "red",
+                          color: 'red',
                         },
                       }}
                       style={{
-                        position: "absolute",
+                        position: 'absolute',
                         bottom: 4,
                         right: 3,
                       }}
@@ -221,13 +291,13 @@ const EditNoteModal = (props) => {
               </Grid>
             </CardContent>
           )}
-          <CardContent style={{ display: "flex", flexDirection: "column" }}>
+          <CardContent style={{ display: 'flex', flexDirection: 'column' }}>
             <TextField
               placeholder="Title"
               variant="standard"
               InputProps={{
                 disableUnderline: true,
-                style: { fontSize: "1.5rem", fontWeight: 500 },
+                style: { fontSize: '1.5rem', fontWeight: 500 },
               }}
               onChange={(e) => setTile(e.target.value)}
               value={title}
@@ -244,15 +314,15 @@ const EditNoteModal = (props) => {
           </CardContent>
           <CardActions
             sx={{
-              "&:hover": {
-                background: "#848687",
-                borderRadius: "50%",
-                cursor: "pointer",
+              '&:hover': {
+                background: '#848687',
+                borderRadius: '50%',
+                cursor: 'pointer',
               },
             }}
             style={{
-              display: "flex",
-              position: "absolute",
+              display: 'flex',
+              position: 'absolute',
               top: 5,
               right: 10,
             }}
@@ -260,49 +330,49 @@ const EditNoteModal = (props) => {
             {isPin ? (
               <PushPinIcon
                 style={{
-                  height: "30px",
-                  width: "30px",
+                  height: '30px',
+                  width: '30px',
                 }}
                 onClick={() => handleToggleIsPin()}
               />
             ) : (
               <PushPinOutlinedIcon
                 style={{
-                  height: "30px",
-                  width: "30px",
+                  height: '30px',
+                  width: '30px',
                 }}
                 onClick={() => handleToggleIsPin()}
               />
             )}
           </CardActions>
-          <CardActions style={{ height: "30px" }}>
+          <CardActions style={{ height: '30px' }}>
             <GroupAddOutlinedIcon
               aria-label="Add Member"
               sx={{
-                "&:hover": {
-                  background: "#848687",
-                  borderRadius: "50%",
-                  cursor: "pointer",
+                '&:hover': {
+                  background: '#848687',
+                  borderRadius: '50%',
+                  cursor: 'pointer',
                 },
               }}
               fontSize="small"
               style={{
-                marginLeft: "auto",
-                height: "30px",
-                width: "30px",
+                marginLeft: 'auto',
+                height: '30px',
+                width: '30px',
               }}
               onClick={() => setOpenAddMember(true)}
             />
             <AddPhotoAlternateOutlinedIcon
               fontSize="small"
               sx={{
-                "&:hover": {
-                  background: "#848687",
-                  borderRadius: "50%",
-                  cursor: "pointer",
+                '&:hover': {
+                  background: '#848687',
+                  borderRadius: '50%',
+                  cursor: 'pointer',
                 },
               }}
-              style={{ marginLeft: "4px", height: "30px", width: "30px" }}
+              style={{ marginLeft: '4px', height: '30px', width: '30px' }}
               onClick={() => handleClickAddPhoto(note)}
             />
             <input
@@ -310,34 +380,34 @@ const EditNoteModal = (props) => {
               type="file"
               name="myImage"
               accept=".jpg,.jpeg,.png"
-              style={{ display: "none" }}
+              style={{ display: 'none' }}
               multiple
               onChange={() => onChangeImage()}
             />
             <Archive
               fontSize="small"
-              style={{ marginLeft: "4px", height: "30px", width: "30px" }}
+              style={{ marginLeft: '4px', height: '30px', width: '30px' }}
               onClick={() => archiveNote(note)}
               sx={{
-                "&:hover": {
-                  background: "#848687",
-                  borderRadius: "50%",
-                  cursor: "pointer",
+                '&:hover': {
+                  background: '#848687',
+                  borderRadius: '50%',
+                  cursor: 'pointer',
                 },
               }}
             />
             <Delete
               fontSize="small"
               style={{
-                height: "30px",
-                width: "30px",
+                height: '30px',
+                width: '30px',
               }}
               onClick={() => deleteNote(note)}
               sx={{
-                "&:hover": {
-                  background: "#848687",
-                  borderRadius: "50%",
-                  cursor: "pointer",
+                '&:hover': {
+                  background: '#848687',
+                  borderRadius: '50%',
+                  cursor: 'pointer',
                 },
               }}
             />

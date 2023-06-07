@@ -28,7 +28,6 @@ const NavList = () => {
           button
           key={list.id}
           style={{
-            padding: "0 8px",
             backgroundColor:
               colorCurrentRoute === list.route ? "#b7b7b7" : "inherit",
           }}
@@ -40,7 +39,6 @@ const NavList = () => {
               display: "flex",
               color: "inherit",
               width: "inherit",
-              padding: "8px 0",
             }}
           >
             <ListItemIcon style={{ alignItems: "center" }}>

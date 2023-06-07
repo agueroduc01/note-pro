@@ -44,8 +44,10 @@ const style = {
 const ChangePassword = (props) => {
   const { open, handleCloseFromParent } = props;
   const [newPassword, setNewPassword] = useState("");
+  const [newPasswordAgain, setNewPasswordAgain] = useState("");
   const [oldPassword, setOldPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordAgain, setShowPasswordAgain] = useState(false);
   const [showOldPassword, setShowOldPassword] = useState(false);
   const accessToken = useSelector((state) => state.user.login.accessToken);
   const isLoading = useSelector((state) => state.user.login.isFetching);
@@ -54,6 +56,9 @@ const ChangePassword = (props) => {
 
   const handleClickShowPassword = () =>
     setShowPassword((showPassword) => !showPassword);
+
+  const handleClickShowPasswordAgain = () =>
+    setShowPasswordAgain((showPassword) => !showPassword);
 
   const handleClickShowOldPassword = () =>
     setShowOldPassword((showOldPassword) => !showOldPassword);
@@ -98,50 +103,99 @@ const ChangePassword = (props) => {
       >
         <Box sx={style}>
           <Typography variant="h5">CHANGE PASSWORD</Typography>
-          <TextField
-            style={{ marginTop: "24px", width: "80%" }}
-            label="Old Password"
-            placeholder="Enter your old password here..."
-            type={showOldPassword ? "text" : "password"}
-            variant="outlined"
-            onChange={(e) => setOldPassword(e.target.value)}
-            InputProps={{
-              style: { fontSize: "16px" },
-              endAdornment: (
-                <InputAdornment position="end" variant="standard">
-                  <IconButton
-                    aria-label="toggle password visibility"
-                    onClick={handleClickShowOldPassword}
-                    onMouseDown={handleMouseDownPassword}
-                  >
-                    {showOldPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
+          <form
+            style={{
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
             }}
-          />
-          <TextField
-            style={{ marginTop: "24px", width: "80%" }}
-            label="New Password"
-            variant="outlined"
-            type={showPassword ? "text" : "password"}
-            placeholder="Enter your new password here..."
-            onChange={(e) => setNewPassword(e.target.value)}
-            InputProps={{
-              style: { fontSize: "16px" },
-              endAdornment: (
-                <InputAdornment position="end" variant="standard">
-                  <IconButton
-                    aria-label="toggle password visibility"
-                    onClick={handleClickShowPassword}
-                    onMouseDown={handleMouseDownPassword}
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
+          >
+            <TextField
+              style={{ marginTop: "24px", width: "80%", display: "none" }}
+              variant="outlined"
+              id="userName"
+              name="username"
+              autoComplete="username"
+              value=""
+              type="text"
+            />
+            <TextField
+              style={{ marginTop: "24px", width: "80%" }}
+              label="Current Password"
+              type={showOldPassword ? "text" : "password"}
+              variant="outlined"
+              onChange={(e) => setOldPassword(e.target.value)}
+              autoComplete="old-password"
+              InputProps={{
+                style: { fontSize: "16px" },
+                endAdornment: (
+                  <InputAdornment position="end" variant="standard">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowOldPassword}
+                      onMouseDown={handleMouseDownPassword}
+                    >
+                      {showOldPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <TextField
+              style={{ marginTop: "24px", width: "80%" }}
+              label="New Password"
+              variant="outlined"
+              type={showPassword ? "text" : "password"}
+              onChange={(e) => setNewPassword(e.target.value)}
+              autoComplete="new-password"
+              InputProps={{
+                style: { fontSize: "16px" },
+                endAdornment: (
+                  <InputAdornment position="end" variant="standard">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      onMouseDown={handleMouseDownPassword}
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <TextField
+              id="new-password-again"
+              style={{ marginTop: "24px", width: "80%" }}
+              label="New Password Again"
+              variant="outlined"
+              error={
+                newPasswordAgain !== "" && newPasswordAgain !== newPassword
+              }
+              helperText={
+                newPasswordAgain !== "" && newPasswordAgain !== newPassword
+                  ? "New Password Again Not Match"
+                  : ""
+              }
+              type={showPasswordAgain ? "text" : "password"}
+              onChange={(e) => setNewPasswordAgain(e.target.value)}
+              autoComplete="new-password-again"
+              InputProps={{
+                style: { fontSize: "16px" },
+                endAdornment: (
+                  <InputAdornment position="end" variant="standard">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPasswordAgain}
+                      onMouseDown={handleMouseDownPassword}
+                    >
+                      {showPasswordAgain ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </form>
           <div
             style={{
               marginTop: "24px",
